@@ -1,0 +1,478 @@
+html, body {
+	font-family: Tahoma, Verdana, sans-serif;
+}
+
+/*variables*/
+html {
+	--brush-cursor: default;
+	--bar-foreground: #ffffff;
+	--bar-background: #000000;
+	--menu-item-edge: 34px;
+	--menu-item-edge-thin: 28px;
+	--status-item-edge: 18px;
+	--interface-item-foreground: #ffffff;
+	--interface-item-background: transparent;
+	--interface-item-background-hover: #404040;
+	--interface-item-background-active: #ffffff;
+	--interface-item-background-selected: #808080;
+	--interface-item-margin: 2px;
+
+	--color-border: #ffffff;
+	--tone-border-size: 3px;
+	--tone-border: #404040;
+	--tone-border-hover: #808080;
+	--tone-border-active: #ffffff;
+	--tone-border-selected: #ffffff;
+
+	--settings-width: 60vw;
+
+	--ui: url('./ui.png');
+	--hand-cursor: url('./hand.cursor.png');
+	--magnifier-cursor: url('./magnifier.cursor.png');
+	--eyedropper-cursor: url('./eyedropper.cursor.png');
+	--fill-cursor: url('./fill.cursor.png');
+}
+
+/*common style*/
+#tegaki-menu,
+#tegaki-status {
+	width: 100%;
+	color: var(--bar-foreground);
+	background-color: var(--bar-background);
+	position: absolute;
+	left: 0;
+	display: block;
+	cursor: default;
+	padding: 2px;
+	font-size: 0;
+	box-sizing: border-box;
+}
+
+/*bar positions*/
+#tegaki-menu {
+	top: 0;
+}
+#tegaki-status {
+	bottom: 0;
+}
+
+/*interface items*/
+#tegaki-menu .tegaki-interface-item,
+[id^='tegaki-status-button-'] {
+	font-size: 0;
+	display: inline-block;
+	cursor: pointer;
+	margin: var(--interface-item-margin);
+	border-radius: 15%;
+	overflow: hidden;
+	position: relative;
+	vertical-align: middle;
+	/** /background-color: #00ff00!important;/**/
+}
+.tegaki-interface-item,
+.tegaki-menu-tone-picker-item {
+	position: relative;
+	width: var(--menu-item-edge);
+	padding-bottom: var(--menu-item-edge);
+	background-color: var(--interface-item-background);
+}
+[id^='tegaki-status-button-'] {
+	width: var(--status-item-edge);
+	padding-bottom: var(--status-item-edge);
+}
+
+/*thin buttons*/
+#tegaki-menu #tegaki-menu-tone-indicator,
+#tegaki-menu #tegaki-menu-tool-property-brush-shape-square,
+#tegaki-menu #tegaki-menu-tool-property-brush-shape-round,
+#tegaki-menu #tegaki-menu-tool-property-brush-size-indicator,
+#tegaki-menu #tegaki-menu-tool-property-brush-size-decrease,
+#tegaki-menu #tegaki-menu-tool-property-brush-size-increase {
+	width: var(--menu-item-edge-thin);
+}
+
+/*icons*/
+[id^='tegaki-menu-tool-']:not([id^='tegaki-menu-tool-property']),
+[id^='tegaki-menu-action-'],
+#tegaki-menu-tool-property-brush-size-decrease,
+#tegaki-menu-tool-property-brush-size-increase,
+[id^='tegaki-status-box-']::before,
+[id^='tegaki-status-button-'] {
+	background-image: var(--ui);
+	background-repeat: no-repeat;
+}
+
+/*interactive*/
+.tegaki-interface-item:hover {
+	background-color: var(--interface-item-background-hover);
+}
+.tegaki-interface-item:active {
+	background-color: var(--interface-item-background-active);
+}
+.tegaki-interface-item.selected {
+	background-color: var(--interface-item-background-selected);
+}
+
+/*non-interactive*/
+#tegaki-menu-palette-current,
+#tegaki-status-box-coordinates,
+#tegaki-status-box-zoom,
+#tegaki-workspace[data-undos-available='0'] #tegaki-menu-action-undo,
+#tegaki-workspace[data-redos-available='0'] #tegaki-menu-action-redo,
+#tegaki-workspace:not([data-current-tool='draw']):not([data-current-tool='erase']) [id^='tegaki-menu-tool-property-brush-'],
+#tegaki-menu #tegaki-menu-tool-property-brush-size-indicator {
+	background-color: var(--interface-item-background);
+	cursor: default;
+}
+
+/*disabled*/
+#tegaki-workspace[data-undos-available='0'] #tegaki-menu-action-undo::after,
+#tegaki-workspace[data-redos-available='0'] #tegaki-menu-action-redo::after,
+#tegaki-workspace:not([data-current-tool='draw']):not([data-current-tool='erase']) [id^='tegaki-menu-tool-property-brush-']:not(#tegaki-menu-tool-property-brush-size-range)::after {
+	content: "";
+	background-color: var(--bar-background);
+	opacity: 0.5;
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	cursor: default;
+}
+
+/*tools*/
+#tegaki-menu-tool-hand {
+	background-position: 0 0;
+}
+#tegaki-menu-tool-magnifier {
+	background-position: -34px 0;
+}
+#tegaki-menu-tool-draw {
+	background-position: -68px 0;
+}
+#tegaki-menu-tool-erase {
+	background-position: -102px 0;
+}
+#tegaki-menu-tool-eyedropper {
+	background-position: -136px 0;
+}
+#tegaki-menu-tool-fill {
+	background-position: -170px 0;
+}
+/*TODO select rectangle*/
+/*TODO select lasso*/
+/*TODO select wand*/
+/*TODO move*/
+
+/*actions*/
+#tegaki-menu-action-flip {
+	background-position: 0 -34px;
+}
+#tegaki-menu-action-undo {
+	background-position: -34px -34px;
+}
+#tegaki-menu-action-redo {
+	background-position: -68px -34px;
+}
+#tegaki-menu-action-clear-in {
+	background-position: -102px -34px;
+}
+#tegaki-menu-action-clear-out {
+	background-position: -136px -34px;
+}
+#tegaki-menu-action-save {
+	background-position: -170px -34px;
+}
+#tegaki-menu #tegaki-menu-action-save:hover {
+	background-color: #00bfff;
+}
+#tegaki-menu-action-send {
+	background-position: -204px -34px;
+}
+#tegaki-menu #tegaki-menu-action-send:hover {
+	background-color: #00bfff;
+}
+#tegaki-menu #tegaki-menu-action-wipe {
+	background-position: -238px -34px;
+	float: right;
+}
+#tegaki-menu #tegaki-menu-action-wipe:hover {
+	background-color: #ff0000;
+}
+
+/*palette current*/
+#tegaki-menu-palette-current-foreground,
+#tegaki-menu-palette-current-background {
+	--palette-current-edge: calc(var(--menu-item-edge) / 2);
+	display: inline-block;
+	width: var(--palette-current-edge);
+	height: var(--palette-current-edge);
+	background-image: var(--transparent);
+	cursor: pointer;
+	position: absolute;
+}
+#tegaki-menu-palette-current-foreground::after,
+#tegaki-menu-palette-current-background::after {
+	content: "";
+	display: inline-block;
+	width: 100%;
+	padding-bottom: 100%;
+	background-color: inherit;
+	border: 1px solid var(--bar-foreground);
+}
+#tegaki-menu-palette-current-foreground {
+	top: 3px;
+	left: 3px;
+	z-index: 1;
+}
+#tegaki-menu-palette-current-background {
+	top: 11px;
+	right: 5px;
+}
+
+/*tones*/
+#tegaki-menu-tone-picker {
+	display: none;
+	width: 100%;
+	position: absolute;
+	background-color: var(--bar-background);
+}
+#tegaki-menu-tone-picker.open {
+	display: block;
+}
+#tegaki-menu #tegaki-menu-tone-indicator {
+	--tone-indicator-edge: calc(var(--menu-item-edge-thin) / 1.25);
+	border-radius: 50%;
+	width: var(--tone-indicator-edge);
+	padding-bottom: var(--tone-indicator-edge);
+}
+#tegaki-menu-tone-indicator,
+.tegaki-menu-tone-picker-item {
+	background-color: var(--bar-foreground);
+	border: 3px solid var(--bar-foreground);
+}
+#tegaki-menu-tone-indicator[data-name='clear'],
+.tegaki-menu-tone-picker-item[data-name='clear'] {
+	background-color: var(--bar-background);
+}
+.tegaki-menu-tone-picker-item {
+	display: inline-block;
+	cursor: pointer;
+	margin: 2px;
+	border-radius: 15%;
+	border-color: var(--tone-border);
+}
+.tegaki-menu-tone-picker-item:hover {
+	border-color: var(--tone-border-hover);
+}
+.tegaki-menu-tone-picker-item:active {
+	border-color: var(--tone-border-active);
+}
+#tegaki-menu-tone-picker .tegaki-menu-tone-picker-item.selected {
+	border-color: var(--tone-border-selected);
+}
+
+/*brush shape*/
+[id^='tegaki-menu-tool-property-brush-shape-'] {
+	background-image: none;
+}
+[id^='tegaki-menu-tool-property-brush-shape-']::before {
+	--shape-edge: calc(var(--menu-item-edge-thin) / 2);
+	display: inline-block;
+	width: var(--shape-edge);
+	height: var(--shape-edge);
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	content: "";
+	background-color: var(--interface-item-foreground);
+}
+#tegaki-menu-tool-property-brush-shape-round::before {
+	border-radius: 50%;
+}
+
+/*brush size*/
+#tegaki-menu #tegaki-menu-tool-property-brush-size-indicator {
+	padding: 0 0 4px 0;
+	color: var(--bar-foreground);
+	text-align: center;
+	font-size: 14px;
+	font-weight: bold;
+	background-image: none;
+}
+#tegaki-menu-tool-property-brush-size-range {
+	position: relative;
+	vertical-align: middle;
+	cursor: pointer;
+}
+#tegaki-menu-tool-property-brush-size-range:disabled {
+	cursor: default;
+}
+#tegaki-menu-tool-property-brush-size-range:disabled::after {
+	content: "";
+	display: block;
+	position: absolute;
+	top: calc(-1 * var(--menu-item-edge) / 2);
+	left: 0;
+	width: 100%;
+	height: var(--menu-item-edge);
+	background-color: var(--bar-background);
+	opacity: 0.5;
+}
+#tegaki-menu-tool-property-brush-size-decrease {
+	background-position: 0 -68px;
+}
+#tegaki-menu-tool-property-brush-size-increase {
+	background-position: -28px -68px;
+}
+
+/*status box icons*/
+[id^='tegaki-status-box-']::before {
+	content: "";
+	display: inline-block;
+	width: var(--status-item-edge);
+	padding-bottom: var(--status-item-edge);
+	background-image: var(--ui);
+	background-repeat: no-repeat;
+	vertical-align: middle;
+	margin-right: 4px;
+}
+[id^='tegaki-status-box-'] {
+	padding: 0;
+	display: inline-block;
+	font-size: 12px;
+	line-height: var(--status-item-edge);
+	vertical-align: middle;
+}
+/*status coordinates*/
+#tegaki-status-box-coordinates {
+	width: 7em;
+}
+#tegaki-status-box-coordinates::before {
+	background-position: 0 -102px;
+}
+/*status zoom*/
+#tegaki-status-box-zoom {
+	width: 5em;
+}
+#tegaki-status-box-zoom::before {
+	background-position: -18px -102px;
+}
+/*status buttons*/
+#tegaki-status-button-zoom-out {
+	background-position: -36px -102px;
+}
+#tegaki-status-button-zoom-in {
+	background-position: -54px -102px;
+}
+#tegaki-status-button-fullscreen {
+	background-position: -72px -102px;
+	float: right;
+}
+#tegaki-workspace[data-fullscreen='1'] #tegaki-status-button-fullscreen {
+	background-position: -90px -102px;
+}
+#tegaki-status-button-help {
+	background-position: -108px -102px;
+	float: right;
+}
+#tegaki-status-button-settings {
+	background-position: -126px -102px;
+	float: right;
+}
+
+/*cursors*/
+#tegaki-workspace[data-current-tool='hand'] {
+	cursor: var(--hand-cursor) 16 16, grab;
+}
+#tegaki-workspace[data-current-tool='magnifier'] {
+	cursor: var(--magnifier-cursor) 12 12, zoom-in;
+}
+#tegaki-workspace[data-current-tool='eyedropper'] {
+	cursor: var(--eyedropper-cursor) 4 27, default;
+}
+#tegaki-workspace[data-current-tool='fill'] {
+	cursor: var(--fill-cursor) 3 25, default;
+}
+#tegaki-workspace[data-current-tool='draw'] #tegaki-apparent,
+#tegaki-workspace[data-current-tool='erase'] #tegaki-apparent {
+	cursor: none;
+}
+#tegaki-workspace[data-current-tool='draw'][data-tool-size='0'] #tegaki-apparent,
+#tegaki-workspace[data-current-tool='erase'][data-tool-size='0'] #tegaki-apparent {
+	cursor: default;
+}
+
+/*settings*/
+#tegaki-settings, #tegaki-settings-dim {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	cursor: default;
+	overflow: auto;
+}
+#tegaki-settings {
+	display: block;
+	transition: left 250ms;
+	left: calc(-1 * var(--settings-width));
+	width: var(--settings-width);
+	color: var(--bar-foreground);
+	background-color: var(--bar-background);
+	border-right: 1px solid var(--bar-foreground);
+	padding: 8px;
+	box-sizing: border-box;
+	z-index: 11;
+}
+#tegaki-settings.open {
+	left: 0;
+}
+#tegaki-settings-dim {
+	display: none;
+	background-color: rgba(0, 0, 0, 0.5);
+	width: 100vw;
+	z-index: 10;
+}
+#tegaki-settings.open + #tegaki-settings-dim {
+	display: block;
+}
+#tegaki-status-button-settings {
+	z-index: 12;
+}
+#tegaki-settings h1 {
+	margin: 0.5em;
+}
+#tegaki-settings td {
+	color: var(--bar-foreground);
+	vertical-align: top;
+	padding: 4px;
+}
+#canvas-size-width, #canvas-size-height {
+	width: 7em;
+}
+
+/*viewports wider than 1024px get --settings-width 50%*/
+@media only screen and (min-width: 1024px)
+{
+	:root {
+		--settings-width: 50vw;
+	}
+}
+/*viewports narrower than 512px get --settings-width near 100%*/
+@media only screen and (max-width: 512px)
+{
+	:root {
+		--settings-width: calc(100vw - 16px - 8px - 4px);
+		--interface-item-margin: 1px;
+	}
+	#tegaki-menu #tegaki-menu-tool-magnifier {
+		display: none;
+	}
+	#tegaki-menu br {
+		display: none;
+	}
+	#tegaki-settings, #tegaki-settings td {
+		font-size: 0.9em;
+	}
+}

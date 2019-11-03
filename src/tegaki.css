@@ -1,0 +1,34 @@
+:root {
+	--workspace-background: url('./workspace_background.png');
+	--transparent: url('./transparent.png');
+}
+[id^='tegaki-'] {
+	user-select: none;
+}
+html, body {
+	margin: 0;
+	overflow: hidden;
+	width: 100vw;
+	height: 100vh;
+}
+#tegaki-workspace {
+	position: absolute;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+	width: 100vw;
+	height: 100vh;
+	background-image: var(--workspace-background);
+}
+#tegaki-apparent {
+	position: absolute;
+}
+#tegaki-apparent canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+#tegaki-paper {
+	background-image: var(--transparent);
+	background-position: top left;
+}

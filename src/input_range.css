@@ -1,0 +1,76 @@
+/*input ranges*/
+/*this is pretty old now, most of these rules must've come from a discussion thread somewhere*/
+:root {
+	--range-track: #aaaaaa;
+	--range-thumb: #ffffff;
+}
+input[type=range] {
+	-webkit-appearance: none;
+	border: none;
+	width: 56px;
+}
+input[type=range]::-webkit-slider-runnable-track {
+	width: 56px;
+	height: 6px;
+	background: var(--range-track);
+	border: none;
+}
+input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	border: none;
+	height: 16px;
+	width: 16px;
+	border-radius: 50%;
+	background: var(--range-thumb);
+	margin-top: -5px;
+}
+input[type=range]:focus {
+	outline: none;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+	background: var(--range-track);
+}
+input[type=range]::-moz-range-track {
+	width: 56px;
+	height: 6px;
+	background: var(--range-track);
+	border: none;
+}
+input[type=range]::-moz-range-thumb {
+	border: none;
+	height: 16px;
+	width: 16px;
+	border-radius: 50%;
+	background: var(--range-thumb);
+}
+input[type=range]:-moz-focusring {
+	outline: 1px solid transparent;
+	outline-offset: -1px;
+}
+input[type=range]::-ms-track {
+	width: 56px;
+	height: 6px;
+	background: transparent;
+	border-color: transparent;
+	border-width: 4px 0;
+	color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+	background: var(--range-track);
+}
+input[type=range]::-ms-fill-upper {
+	background: var(--range-track);
+}
+input[type=range]::-ms-thumb {
+	border: none;
+	height: 16px;
+	width: 16px;
+	border-radius: 50%;
+	background: var(--range-thumb);
+}
+input[type=range]:focus::-ms-fill-lower {
+	background: var(--range-track);
+}
+input[type=range]:focus::-ms-fill-upper {
+	background: var(--range-track);
+}

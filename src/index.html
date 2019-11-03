@@ -1,0 +1,35 @@
+<html>
+	<body>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+		<meta name="author" content="secret">
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="./tegaki.css">
+		<link rel="stylesheet" href="./interface.css">
+		<link rel="stylesheet" href="./input_range.css">
+		<script type="module">
+			import { Tegaki } from './tegaki.js';
+			import { Menus } from './interface.js';
+			import { KeyboardShortcuts } from './shortcuts.js';
+			import { tones as tones_shiipainter } from './tones/shiipainter.js';
+			import { tones as tones_secret_omake } from './tones/secret_omake.js';
+
+			// tegaki
+			window.tegaki = new Tegaki();
+
+			// tones
+			tegaki.tones.load(tones_shiipainter);
+			tegaki.tones.load(tones_secret_omake);
+
+			// workspace
+			document.body.appendChild(tegaki.workspace);
+
+			// menu
+			let menus = new Menus(tegaki);
+			tegaki.workspace.appendChild(menus.menu);
+			tegaki.workspace.appendChild(menus.status);
+
+			// shortcuts
+			let keyboard_shortcuts = new KeyboardShortcuts(menus);
+		</script>
+	</body>
+</html>
