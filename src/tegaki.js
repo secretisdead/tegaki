@@ -3,6 +3,7 @@
 // tegaki by secret
 // remember to be kind
 
+//TODO ensure fill respects masks (except tones)
 //TODO brush linear interpolation not working properly at zoom > 1?
 //TODO  maybe just for small brushes?
 //TODO brush quadratic interpolation for original brush shapes
@@ -1087,8 +1088,8 @@ export class Move extends Tool {
 		if (!this.active) {
 			return;
 		}
-		let dx = this.tegaki.cursor.canvas.x - this.start.x;
-		let dy = this.tegaki.cursor.canvas.y - this.start.y;
+		let dx = Math.floor(this.tegaki.cursor.canvas.x - this.start.x);
+		let dy = Math.floor(this.tegaki.cursor.canvas.y - this.start.y);
 		// draw cut_to to floating at dx, dy
 		this.floating_ctx.clearRect(0, 0, this.floating.width, this.floating.height);
 		this.floating_ctx.drawImage(this.cut_to, dx, dy);
