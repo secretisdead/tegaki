@@ -72,6 +72,7 @@ Switch to a tool only while holding the shortcut key and return to the previous 
 | ----------- | -------- |
 | Hand        | Spacebar |
 | Eyedropper  | Alt      |
+| Move        | Ctrl     |
 
 ### Advanced settings
 
