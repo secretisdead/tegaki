@@ -297,7 +297,7 @@ export class Brush extends Tool {
 		this.current_stroke.push(point);
 		if (!this.current_stroke_last_point) {
 			this.paint_point(point.x, point.y);
-			this.apply_masks_to_scratch();
+			this.tegaki.apply_masks(this.scratch, this.scratch_ctx);
 			this.current_stroke_last_point = point;
 		}
 		else {
@@ -606,21 +606,7 @@ export class Brush extends Tool {
 				this._interpolate_linear(p1, p2);
 				break;
 		}
-		this.apply_masks_to_scratch();
-	}
-	apply_masks_to_scratch() {
-		// if there are masks in this.tegaki.masks apply them
-		this.scratch_ctx.globalCompositeOperation = 'destination-out';
-		for (let i in this.tegaki.masks) {
-			let mask = this.tegaki.masks[i];
-			this.scratch_ctx.drawImage(
-				mask,
-				0,
-				0,
-				this.scratch.width,
-				this.scratch.height
-			);
-		}
+		this.tegaki.apply_masks(this.scratch, this.scratch_ctx);
 	}
 	_interpolate_none(p1, p2) {
 		// just draw the current shape and size at the point
@@ -1628,22 +1614,41 @@ export class Tegaki {
 			this.zoom * this.canvas.height / -2
 		);
 	}
-	clear(mode='in') {
-		let masks = this.masks.slice();
-		// don't apply tone mask
-		if (this.tones.current_tone) {
-			masks.splice(masks.indexOf(this.tones.mask), 1);
+	apply_masks(
+		canvas,
+		ctx=null,
+		except=[],
+		composite_operation='destination-out'
+	) {
+		if (!ctx) {
+			ctx = canvas.getContext('2d');
 		}
+		ctx.globalCompositeOperation = composite_operation;
+		for (let i in this.masks) {
+			let mask = this.masks[i];
+			if (-1 != except.indexOf(mask)) {
+				continue;
+			}
+			ctx.drawImage(
+				mask,
+				0,
+				0,
+				canvas.width,
+				canvas.height
+			);
+		}
+	}
+	clear(mode='in') {
 		if ('out' == mode) {
 			// clear outside with no selection does nothing
-			if (0 == masks.length) {
+			if (!this.selection.active) {
 				return;
 			}
 			this.canvas_ctx.globalCompositeOperation = 'destination-in';
 		}
 		else {
 			// clear inside with no selection clears entire canvas
-			if (0 == masks.length) {
+			if (!this.selection.active) {
 				this.push_undo_canvas();
 				this.canvas_ctx.clearRect(
 					0,
@@ -1658,17 +1663,7 @@ export class Tegaki {
 			this.canvas_ctx.globalCompositeOperation = 'destination-out';
 		}
 		this.push_undo_canvas();
-		// if there are masks apply them with the specified mode
-		for (let i in this.masks) {
-			let mask = this.masks[i];
-			this.canvas_ctx.drawImage(
-				mask,
-				0,
-				0,
-				this.canvas.width,
-				this.canvas.height
-			);
-		}
+		this.canvas_ctx.drawImage(this.selection.mask);
 		this.clear_display();
 		this.draw_to_display(this.canvas);
 		this.safety_save();
