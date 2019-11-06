@@ -4,8 +4,6 @@
 // remember to be kind
 
 //TODO ensure fill respects masks (except tones)
-//TODO brush linear interpolation not working properly at zoom > 1?
-//TODO  maybe just for small brushes?
 //TODO brush quadratic interpolation for original brush shapes
 //TODO  for smooth curves between large input gaps instead of straight lines while keeping good line quality
 //TODO switching between brush and eraser with shortcut keys doesn't instantly draw new cursor shape
@@ -290,8 +288,8 @@ export class Brush extends Tool {
 			return;
 		}
 		let point = {
-			x: this.tegaki.cursor.canvas.x,
-			y: this.tegaki.cursor.canvas.y,
+			x: Math.floor(this.tegaki.cursor.canvas.x),
+			y: Math.floor(this.tegaki.cursor.canvas.y),
 		};
 		this.current_stroke.push(point);
 		if (!this.current_stroke_last_point) {
