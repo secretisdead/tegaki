@@ -1106,6 +1106,48 @@ export class Tones {
 	}
 }
 
+// selection
+export class Selection {
+	constructor(tegaki) {
+		this.tegaki = tegaki;
+		this.active = false;
+		this.mask = document.createElement('canvas');
+		this.mask.width = this.tegaki.canvas.width;
+		this.mask.height = this.tegaki.canvas.height;
+		this.mask_ctx = this.mask.getContext('2d');
+		this.tegaki.workspace.addEventListener('canvas-size-change', () => {
+			this.mask.width = this.tegaki.canvas.width;
+			this.mask.height = this.tegaki.canvas.height;
+		});
+		this.tegaki.workspace.addEventListener('wipe', () => {
+			this.active = false;
+		});
+	}
+	deselect() {
+		this.active = false;
+		this.tegaki.remove_mask(this.mask);
+	}
+	select() {
+		this.active = true;
+		this.tegaki.add_mask(this.mask);
+	}
+	select_replace(canvas) {
+		this.mask_ctx.globalCompositeOperation = 'copy';
+		this.mask.drawImage(canvas);
+		this.select();
+	}
+	select_add(canvas) {
+		this.mask_ctx.globalCompositeOperation = 'source-over';
+		this.mask.drawImage(canvas);
+		this.select();
+	}
+	select_remove(canvas) {
+		this.mask_ctx.globalCompositeOperation = 'destination-out';
+		this.mask.drawImage(canvas);
+		this.select();
+	}
+}
+
 // tegaki
 export class Tegaki {
 	constructor(width=512, height=256, check_safety=true) {
@@ -1225,6 +1267,8 @@ export class Tegaki {
 		this.center();
 		// tones
 		this.tones = new Tones(this);
+		// selection
+		this.selection = new Selection(this);
 		// tools
 		this.tools = {
 			hand: new Hand(this),
