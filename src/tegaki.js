@@ -1048,8 +1048,8 @@ export class Move extends Tool {
 			return;
 		}
 		this.active = true;
-		this.start.x = this.tegaki.cursor.workspace.x;
-		this.start.y = this.tegaki.cursor.workspace.y;
+		this.start.x = this.tegaki.cursor.canvas.x;
+		this.start.y = this.tegaki.cursor.canvas.y;
 		// clear cut_from and cut_to
 		this.cut_from_ctx.clearRect(
 			0,
@@ -1087,8 +1087,8 @@ export class Move extends Tool {
 		if (!this.active) {
 			return;
 		}
-		let dx = this.tegaki.cursor.workspace.x - this.start.x;
-		let dy = this.tegaki.cursor.workspace.y - this.start.y;
+		let dx = this.tegaki.cursor.canvas.x - this.start.x;
+		let dy = this.tegaki.cursor.canvas.y - this.start.y;
 		// draw cut_to to floating at dx, dy
 		this.floating_ctx.clearRect(0, 0, this.floating.width, this.floating.height);
 		this.floating_ctx.drawImage(this.cut_to, dx, dy);
