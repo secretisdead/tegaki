@@ -140,12 +140,10 @@ export class Hand extends Tool {
 	}
 	input_press(type) {
 		this.active = true;
-		this.tegaki.workspace.classList.add('grabbing');
 		this.last.x = this.tegaki.cursor.workspace.x;
 		this.last.y = this.tegaki.cursor.workspace.y;
 	}
 	input_release(x, y) {
-		this.tegaki.workspace.classList.remove('grabbing');
 		this.active = false;
 		this.last.x = null;
 		this.last.y = null;
