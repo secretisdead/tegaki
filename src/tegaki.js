@@ -308,7 +308,7 @@ export class Brush extends Tool {
 		if (!this.active) {
 			return;
 		}
-		this.update_stroke(true);
+		this.update_stroke();
 		this.active = false;
 	}
 	discard_stroke() {
