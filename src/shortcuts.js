@@ -108,12 +108,9 @@ export class KeyboardShortcuts {
 				eyedropper: {
 					key: 'Alt',
 				},
-				/** /
 				move: {
 					key: 'Control',
-					active: false,
 				}
-				/**/
 			},
 			temp_modifiers: {
 				select: {
