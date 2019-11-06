@@ -1951,6 +1951,9 @@ export class Tegaki {
 		this.masks = [];
 	}
 	add_mask(canvas) {
+		if (-1 != this.masks.indexOf(canvas)) {
+			return this.masks.length - 1;
+		}
 		this.masks.push(canvas);
 		return this.masks.length - 1;
 	}
