@@ -991,7 +991,132 @@ export class Fill extends Tool {
 	}
 }
 
-//TODO export class Move extends Tool {}
+export class Move extends Tool {
+	constructor(tegaki) {
+		super(tegaki);
+		this.name = 'move';
+		this.active = false;
+		this.cut_from = document.createElement('canvas');
+		this.cut_from.width = this.tegaki.canvas.width;
+		this.cut_from.height = this.tegaki.canvas.height;
+		this.cut_from_ctx = this.cut_from.getContext('2d');
+		this.cut_to = document.createElement('canvas');
+		this.cut_to.width = this.tegaki.canvas.width;
+		this.cut_to.height = this.tegaki.canvas.height;
+		this.cut_to_ctx = this.cut_to.getContext('2d');
+		this.floating = document.createElement('canvas');
+		this.floating.width = this.tegaki.canvas.width;
+		this.floating.height = this.tegaki.canvas.height;
+		this.floating_ctx = this.floating.getContext('2d');
+		this.tegaki.workspace.addEventListener('canvas-size-change', () => {
+			this.cut_from.width = this.tegaki.canvas.width;
+			this.cut_from.height = this.tegaki.canvas.height;
+			this.cut_to.width = this.tegaki.canvas.width;
+			this.cut_to.height = this.tegaki.canvas.height;
+			this.floating.width = this.tegaki.canvas.width;
+			this.floating.height = this.tegaki.canvas.height;
+		});
+		this.start = {
+			x: null,
+			y: null,
+		};
+	}
+	input_press(type) {
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		// right click cancels move
+		if ('m2' == type) {
+			if (this.active) {
+				this.discard_move();
+			}
+			return;
+		}
+		this.start_move();
+	}
+	input_release(x, y) {
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		this.end_move();
+	}
+	input_move() {
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		this.update_move();
+	}
+	start_move() {
+		if (this.active) {
+			return;
+		}
+		this.active = true;
+		this.start.x = this.tegaki.cursor.workspace.x;
+		this.start.y = this.tegaki.cursor.workspace.y;
+		// clear cut_from and cut_to
+		this.cut_from_ctx.clearRect(
+			0,
+			0,
+			this.cut_from.width,
+			this.cut_from.height
+		);
+		this.cut_to_ctx.clearRect(
+			0,
+			0,
+			this.cut_to.width,
+			this.cut_to.height
+		);
+		if (this.tegaki.selection.active) {
+			// draw canvas to cut_from and cut selection from it
+			this.cut_to_ctx.globalCompositeOperation = 'source-over';
+			this.cut_from_ctx.drawImage(this.canvas, 0, 0);
+			this.cut_from_ctx.globalCompositeOperation = 'destination-out';
+			this.cut_from_ctx.drawImage(this.tegaki.selection.mask, 0, 0);
+			// draw canvas to cut_to and cut non-selection from it
+			this.cut_to_ctx.globalCompositeOperation = 'source-over';
+			this.cut_to_ctx.drawImage(this.canvas, 0, 0);
+			this.cut_to_ctx.globalCompositeOperation = 'destination-in';
+			this.cut_to_ctx.drawImage(this.tegaki.selection.mask, 0, 0);
+		}
+		// no selection moves entire canvas
+		else {
+			// draw entire canvas to cut_to
+			this.cut_to_ctx.globalCompositeOperation = 'source-over';
+			this.cut_to_ctx.drawImage(this.tegaki.canvas, 0, 0);
+		}
+		this.update_move();
+	}
+	update_move() {
+		if (!this.active) {
+			return;
+		}
+		let dx = this.tegaki.cursor.workspace.x - this.start.x;
+		let dy = this.tegaki.cursor.workspace.y - this.start.y;
+		// draw cut_to to floating at dx, dy
+		this.floating_ctx.clearRect(0, 0, this.floating.width, this.floating.height);
+		this.floating_ctx.drawImage(this.cut_to, dx, dy);
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.cut_from);
+		this.tegaki.draw_to_display(this.floating);
+	}
+	end_move() {
+		if (!this.active) {
+			return;
+		}
+		this.update_move();
+		// commit movement
+		this.tegaki.canvas_ctx.clearRect(
+			0,
+			0,
+			this.tegaki.canvas.width,
+			this.tegaki.canvas.height
+		);
+		this.tegaki.canvas_ctx.globalCompositeOperation = 'source-over';
+		this.tegaki.canvas_ctx.drawImage(this.cut_from, 0, 0);
+		this.tegaki.canvas_ctx.drawImage(this.floating, 0, 0);
+		this.active = false;
+		this.start.x = null;
+		this.start.y = null;
+	}
+}
+
 //TODO export class Marquee extends Tool {}
 //TODO export class SelectMarquee extends Marquee {}
 //TODO export class SelectLasso extends Brush {}
@@ -1261,7 +1386,7 @@ export class Tegaki {
 			erase: new Erase(this),
 			eyedropper: new Eyedropper(this),
 			fill: new Fill(this),
-			//TODO move
+			move: new Move(this),
 			//TODO select
 			//TODO mosaic
 			//TODO jumble

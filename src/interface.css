@@ -31,6 +31,7 @@ html {
 	--magnifier-cursor: url('./magnifier.cursor.png');
 	--eyedropper-cursor: url('./eyedropper.cursor.png');
 	--fill-cursor: url('./fill.cursor.png');
+	--move-cursor: url('./move.cursor.png');
 }
 
 /*common style*/
@@ -160,10 +161,12 @@ html {
 #tegaki-menu-tool-fill {
 	background-position: -170px 0;
 }
+#tegaki-menu-tool-move {
+	background-position: -204px 0;
+}
 /*TODO select rectangle*/
 /*TODO select lasso*/
 /*TODO select wand*/
-/*TODO move*/
 
 /*actions*/
 #tegaki-menu-action-flip {
@@ -394,6 +397,9 @@ html {
 }
 #tegaki-workspace[data-current-tool='fill'] {
 	cursor: var(--fill-cursor) 3 25, default;
+}
+#tegaki-workspace[data-current-tool='move'] {
+	cursor: var(--move-cursor) 16 16, default;
 }
 #tegaki-workspace[data-current-tool='draw'] #tegaki-apparent,
 #tegaki-workspace[data-current-tool='erase'] #tegaki-apparent {
