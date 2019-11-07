@@ -1122,8 +1122,10 @@ export class Move extends Tool {
 		this.tegaki.canvas_ctx.globalCompositeOperation = 'source-over';
 		this.tegaki.canvas_ctx.drawImage(this.cut_from, 0, 0);
 		this.tegaki.canvas_ctx.drawImage(this.floating, 0, 0);
-		// move selection
-		this.tegaki.selection.move(this.end.x - this.start.x, this.end.y - this.start.y);
+		if (this.tegaki.selection.active) {
+			// move selection
+			this.tegaki.selection.move(this.end.x - this.start.x, this.end.y - this.start.y);
+		}
 		this.tegaki.selection.hide_ants = false;
 		this.active = false;
 		this.start.x = null;
