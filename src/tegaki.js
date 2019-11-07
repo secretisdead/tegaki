@@ -14,6 +14,33 @@
 
 import { localization } from './localization.js';
 
+export function erase_image_data_interior(image_data) {
+	let data = image_data.data;
+	// loop through image data pixels
+	// starting on second row and ending on second to last row
+	let row_length = image_data.width * 4;
+	let erase = [];
+	for (let i = row_length + 4; i < data.length - row_length; i += 4) {
+		if (
+			0 == i % row_length // left edge
+			|| 0 == (i + 4) % row_length // right edge
+		) {
+			continue;
+		}
+		if (
+			0 != data[i - row_length + 3] // pixel above was filled
+			&& 0 != data[i + 4 + 3] // pixel to right was filled
+			&& 0 != data[i + row_length + 3] // pixel below was filled
+			&& 0 != data[i - 4 + 3] // pixel to left was filled
+		) {
+			erase.push(i);
+		}
+	}
+	for (let i in erase) {
+		data[erase[i] + 3] = 0;
+	}
+}
+
 // color picker
 export class ColorPicker {
 	constructor(tegaki) {
@@ -428,30 +455,7 @@ export class Brush extends Tool {
 				this.point.width,
 				this.point.height
 			);
-			let data = image_data.data;
-			// loop through image data pixels
-			// starting on second row and ending on second to last row
-			let row_length = this.point.width * 4;
-			let erase = [];
-			for (let i = row_length + 4; i < data.length - row_length; i += 4) {
-				if (
-					0 == i % row_length // left edge
-					|| 0 == (i + 4) % row_length // right edge
-				) {
-					continue;
-				}
-				if (
-					0 != data[i - row_length + 3] // pixel above was filled
-					&& 0 != data[i + 4 + 3] // pixel to right was filled
-					&& 0 != data[i + row_length + 3] // pixel below was filled
-					&& 0 != data[i - 4 + 3] // pixel to left was filled
-				) {
-					erase.push(i);
-				}
-			}
-			for (let i in erase) {
-				data[erase[i] + 3] = 0;
-			}
+			erase_image_data_interior(image_data);
 			this.cursor_ctx.putImageData(image_data, 0, 0);
 		}
 		// draw crosshairs if brush is large enough
