@@ -1247,7 +1247,9 @@ export class SelectMarquee extends Marquee {
 		this.tegaki.draw_to_display(this.indicator);
 	}
 	end_marquee() {
-		console.log('ending marquee with mode ' + this.mode);
+		if (!this.active) {
+			return;
+		}
 		super.end_marquee();
 		if (
 			'replace' == this.mode
@@ -1269,6 +1271,10 @@ export class SelectMarquee extends Marquee {
 			this.dy
 		);
 		this.tegaki.selection['select_' + this.mode](canvas);
+	}
+	discard_marquee() {
+		super.discard_marquee();
+		this.tegaki.selection.active = false;
 	}
 }
 
