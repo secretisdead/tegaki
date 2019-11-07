@@ -1023,6 +1023,10 @@ export class Move extends Tool {
 			x: null,
 			y: null,
 		};
+		this.end = {
+			x: null,
+			y: null,
+		};
 	}
 	input_press(type) {
 		this.tegaki.clear_display();
@@ -1051,8 +1055,8 @@ export class Move extends Tool {
 			return;
 		}
 		this.active = true;
-		this.start.x = this.tegaki.cursor.canvas.x;
-		this.start.y = this.tegaki.cursor.canvas.y;
+		this.start.x = Math.floor(this.tegaki.cursor.canvas.x);
+		this.start.y = Math.floor(this.tegaki.cursor.canvas.y);
 		// clear cut_from and cut_to
 		this.cut_from_ctx.clearRect(
 			0,
@@ -1067,16 +1071,17 @@ export class Move extends Tool {
 			this.cut_to.height
 		);
 		if (this.tegaki.selection.active) {
+			console.log('selection active move');
 			// draw canvas to cut_from and cut selection from it
-			this.cut_to_ctx.globalCompositeOperation = 'source-over';
-			this.cut_from_ctx.drawImage(this.canvas, 0, 0);
+			this.cut_from_ctx.globalCompositeOperation = 'source-over';
+			this.cut_from_ctx.drawImage(this.tegaki.canvas, 0, 0);
 			this.cut_from_ctx.globalCompositeOperation = 'destination-out';
-			this.cut_from_ctx.drawImage(this.tegaki.selection.mask, 0, 0);
+			this.cut_from_ctx.drawImage(this.tegaki.selection.selection, 0, 0);
 			// draw canvas to cut_to and cut non-selection from it
 			this.cut_to_ctx.globalCompositeOperation = 'source-over';
-			this.cut_to_ctx.drawImage(this.canvas, 0, 0);
+			this.cut_to_ctx.drawImage(this.tegaki.canvas, 0, 0);
 			this.cut_to_ctx.globalCompositeOperation = 'destination-in';
-			this.cut_to_ctx.drawImage(this.tegaki.selection.mask, 0, 0);
+			this.cut_to_ctx.drawImage(this.tegaki.selection.selection, 0, 0);
 		}
 		// no selection moves entire canvas
 		else {
@@ -1084,14 +1089,17 @@ export class Move extends Tool {
 			this.cut_to_ctx.globalCompositeOperation = 'source-over';
 			this.cut_to_ctx.drawImage(this.tegaki.canvas, 0, 0);
 		}
+		this.tegaki.selection.hide_ants = true;
 		this.update_move();
 	}
 	update_move() {
 		if (!this.active) {
 			return;
 		}
-		let dx = Math.floor(this.tegaki.cursor.canvas.x - this.start.x);
-		let dy = Math.floor(this.tegaki.cursor.canvas.y - this.start.y);
+		this.end.x = Math.floor(this.tegaki.cursor.canvas.x);
+		this.end.y = Math.floor(this.tegaki.cursor.canvas.y);
+		let dx = this.end.x - this.start.x;
+		let dy = this.end.y - this.start.y;
 		// draw cut_to to floating at dx, dy
 		this.floating_ctx.clearRect(0, 0, this.floating.width, this.floating.height);
 		this.floating_ctx.drawImage(this.cut_to, dx, dy);
@@ -1114,14 +1122,154 @@ export class Move extends Tool {
 		this.tegaki.canvas_ctx.globalCompositeOperation = 'source-over';
 		this.tegaki.canvas_ctx.drawImage(this.cut_from, 0, 0);
 		this.tegaki.canvas_ctx.drawImage(this.floating, 0, 0);
+		// move selection
+		this.tegaki.selection.move(this.end.x - this.start.x, this.end.y - this.start.y);
+		this.tegaki.selection.hide_ants = false;
 		this.active = false;
 		this.start.x = null;
 		this.start.y = null;
+		this.end.x = null;
+		this.end.y = null;
+	}
+	discard_move() {
+		this.tegaki.selection.hide_ants = false;
+		this.active = false;
+		this.start.x = null;
+		this.start.y = null;
+		this.end.x = null;
+		this.end.y = null;
 	}
 }
 
-//TODO export class Marquee extends Tool {}
-//TODO export class SelectMarquee extends Marquee {}
+export class Marquee extends Tool {
+	constructor(tegaki) {
+		super(tegaki);
+		this.name = 'marquee';
+		this.active = false;
+		this.mode = 'replace';
+		this.start = {
+			x: null,
+			y: null,
+		};
+		this.end = {
+			x: null,
+			y: null,
+		};
+	}
+	input_press(type) {
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		// right click cancels marquee
+		if ('m2' == type) {
+			if (this.active) {
+				this.discard_marquee();
+			}
+			return;
+		}
+		this.start_marquee();
+	}
+	input_release(x, y) {
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		this.end_marquee();
+	}
+	input_move() {
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		this.update_marquee();
+	}
+	start_marquee() {
+		if (this.active) {
+			return;
+		}
+		this.active = true;
+		this.start.x = Math.floor(this.tegaki.cursor.canvas.x);
+		this.start.y = Math.floor(this.tegaki.cursor.canvas.y);
+		this.update_marquee();
+	}
+	update_marquee() {
+		if (!this.active) {
+			return;
+		}
+		this.end.x = Math.floor(this.tegaki.cursor.canvas.x);
+		this.end.y = Math.floor(this.tegaki.cursor.canvas.y);
+	}
+	end_marquee() {
+		if (!this.active) {
+			return;
+		}
+		this.update_marquee();
+		this.active = false;
+		//this.start.x = null;
+		//this.start.y = null;
+		//this.end.x = null;
+		//this.end.y = null;
+	}
+	discard_marquee() {
+		this.active = false;
+	}
+}
+
+export class SelectMarquee extends Marquee {
+	constructor(tegaki) {
+		super(tegaki);
+		this.name = 'select_marquee';
+		this.indicator = document.createElement('canvas');
+		this.indicator.width = this.tegaki.canvas.width;
+		this.indicator.height = this.tegaki.canvas.height;
+		this.indicator_ctx = this.indicator.getContext('2d');
+		this.tegaki.workspace.addEventListener('canvas-size-change', () => {
+			this.indicator.width = this.tegaki.canvas.width;
+			this.indicator.height = this.tegaki.canvas.height;
+		});
+	}
+	update_marquee() {
+		super.update_marquee();
+		if (!this.active) {
+			return;
+		}
+		this.dx = this.end.x - this.start.x;
+		this.dy = this.end.y - this.start.y;
+		//TODO draw selection edge around current selection
+		//TODO indicator should be inverted 1px edge of rect
+		this.indicator_ctx.clearRect(0, 0, this.indicator.width, this.indicator.height);
+		this.indicator_ctx.fillStyle = 'rgba(127, 0, 127, 0.25)';
+		this.indicator_ctx.fillRect(
+			this.start.x,
+			this.start.y,
+			this.dx,
+			this.dy
+		);
+		this.tegaki.clear_display();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		this.tegaki.draw_to_display(this.indicator);
+	}
+	end_marquee() {
+		console.log('ending marquee with mode ' + this.mode);
+		super.end_marquee();
+		if (
+			'replace' == this.mode
+			&& this.start.x == this.end.x
+			&& this.start.y == this.end.y
+		) {
+			this.tegaki.selection.deselect();
+			return;
+		}
+		let canvas = document.createElement('canvas');
+		canvas.width = this.tegaki.canvas.width;
+		canvas.height = this.tegaki.canvas.height;
+		let ctx = canvas.getContext('2d');
+		ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+		ctx.fillRect(
+			this.start.x,
+			this.start.y,
+			this.dx,
+			this.dy
+		);
+		this.tegaki.selection['select_' + this.mode](canvas);
+	}
+}
+
 //TODO export class SelectLasso extends Brush {}
 //TODO export class SelectBrush extends Brush {}
 //TODO export class Mosaic extends Marquee {}
@@ -1223,40 +1371,228 @@ export class Selection {
 	constructor(tegaki) {
 		this.tegaki = tegaki;
 		this.active = false;
+		// selection
+		this.selection = document.createElement('canvas');
+		this.selection.width = this.tegaki.canvas.width;
+		this.selection.height = this.tegaki.canvas.height;
+		this.selection_ctx = this.selection.getContext('2d');
+		// mask
 		this.mask = document.createElement('canvas');
 		this.mask.width = this.tegaki.canvas.width;
 		this.mask.height = this.tegaki.canvas.height;
 		this.mask_ctx = this.mask.getContext('2d');
+		// ants
+		this.rebuild_ants = false;
+		this.hide_ants = false;
+		this.ants_mask = document.createElement('canvas');
+		this.ants_mask.width = this.tegaki.display.width;
+		this.ants_mask.height = this.tegaki.display.height;
+		this.ants_mask_ctx = this.ants_mask.getContext('2d');
+		this.ants = document.createElement('canvas');
+		this.ants.id = 'tegaki-selection-ants';
+		this.ants.width = this.tegaki.display.width;
+		this.ants.height = this.tegaki.display.height;
+		this.ants_ctx = this.ants.getContext('2d');
+		this.ants_diags = [];
+		this.current_ants_diag = 0;
+		this.build_ants_diags();
+		this.tegaki.apparent.appendChild(this.ants);
+		this.interval = setInterval(() => {
+			if (this.hide_ants) {
+				this.ants_ctx.clearRect(0, 0, this.ants.width, this.ants.height);
+				return;
+			}
+			if (!this.active) {
+				return;
+			}
+			if (this.rebuild_ants) {
+				this.build_ants();
+				this.rebuild_ants = false;
+			}
+			// draw ants mask to ants
+			this.ants_ctx.drawImage(this.ants_mask, 0, 0);
+			this.ants_ctx.globalCompositeOperation = 'source-in';
+			this.ants_ctx.drawImage(this.ants_diags[this.current_ants_diag], 0, 0);
+			this.current_ants_diag++;
+			if (this.current_ants_diag > this.ants_diags.length - 1) {
+				this.current_ants_diag = 0;
+			}
+		}, 150);
+		// listeners
 		this.tegaki.workspace.addEventListener('canvas-size-change', () => {
+			this.selection.width = this.tegaki.canvas.width;
+			this.selection.height = this.tegaki.canvas.height;
 			this.mask.width = this.tegaki.canvas.width;
 			this.mask.height = this.tegaki.canvas.height;
 		});
 		this.tegaki.workspace.addEventListener('wipe', () => {
-			this.active = false;
+			this.deselect();
+		});
+		this.tegaki.workspace.addEventListener('apparent-size-change', () => {
+			this.rebuild_ants = true;
+			this.build_ants_diags();
+		});
+		this.tegaki.workspace.addEventListener('select', () => {
+			this.rebuild_ants = true;
 		});
 	}
 	deselect() {
 		this.active = false;
+		this.ants_ctx.clearRect(0,0, this.ants.width, this.ants.height);
 		this.tegaki.remove_mask(this.mask);
+		this.tegaki.workspace.dispatchEvent(new Event('deselect'));
+	}
+	invert(canvas) {
+		let inverted = document.createElement('canvas');
+		inverted.width = canvas.width;
+		inverted.height = canvas.height;
+		let inverted_ctx = inverted.getContext('2d');
+		inverted_ctx.fillRect(0, 0, inverted.width, inverted.height);
+		inverted_ctx.globalCompositeOperation = 'destination-out';
+		inverted_ctx.drawImage(canvas, 0, 0);
+		return inverted
 	}
 	select() {
 		this.active = true;
 		this.tegaki.add_mask(this.mask);
+		this.tegaki.workspace.dispatchEvent(new Event('select'));
 	}
 	select_replace(canvas) {
+		this.selection_ctx.globalCompositeOperation = 'copy';
+		this.selection_ctx.drawImage(canvas, 0, 0);
 		this.mask_ctx.globalCompositeOperation = 'copy';
-		this.mask.drawImage(canvas);
+		this.mask_ctx.drawImage(this.invert(canvas), 0, 0);
 		this.select();
 	}
 	select_add(canvas) {
+		this.selection_ctx.globalCompositeOperation = 'source-over';
+		this.selection_ctx.drawImage(canvas, 0, 0);
 		this.mask_ctx.globalCompositeOperation = 'source-over';
-		this.mask.drawImage(canvas);
+		this.mask_ctx.drawImage(this.invert(canvas), 0, 0);
 		this.select();
 	}
 	select_remove(canvas) {
+		this.selection_ctx.globalCompositeOperation = 'destination-out';
+		this.selection_ctx.drawImage(canvas, 0, 0);
 		this.mask_ctx.globalCompositeOperation = 'destination-out';
-		this.mask.drawImage(canvas);
+		this.mask_ctx.drawImage(this.invert(canvas), 0, 0);
 		this.select();
+	}
+	move(dx, dy) {
+		this.selection_ctx.globalCompositeOperation = 'copy';
+		this.selection_ctx.drawImage(this.invert(this.mask), dx, dy);
+		this.mask_ctx.globalCompositeOperation = 'copy';
+		this.mask_ctx.drawImage(this.invert(this.selection), 0, 0);
+		this.select();
+	}
+	build_ants_diags() {
+		let tile_edge = 6;
+		let stripes = [
+			[
+				0,0,0,1,1,1,
+				0,0,1,1,1,0,
+				0,1,1,1,0,0,
+				1,1,1,0,0,0,
+				1,1,0,0,0,1,
+				1,0,0,0,1,1,
+			],
+			[
+				0,0,1,1,1,0,
+				0,1,1,1,0,0,
+				1,1,1,0,0,0,
+				1,1,0,0,0,1,
+				1,0,0,0,1,1,
+				0,0,0,1,1,1,
+			],
+			[
+				0,1,1,1,0,0,
+				1,1,1,0,0,0,
+				1,1,0,0,0,1,
+				1,0,0,0,1,1,
+				0,0,0,1,1,1,
+				0,0,1,1,1,0,
+			],
+			[
+				1,1,1,0,0,0,
+				1,1,0,0,0,1,
+				1,0,0,0,1,1,
+				0,0,0,1,1,1,
+				0,0,1,1,1,0,
+				0,1,1,1,0,0,
+			],
+			[
+				1,1,0,0,0,1,
+				1,0,0,0,1,1,
+				0,0,0,1,1,1,
+				0,0,1,1,1,0,
+				0,1,1,1,0,0,
+				1,1,1,0,0,0,
+			],
+			[
+				1,0,0,0,1,1,
+				0,0,0,1,1,1,
+				0,0,1,1,1,0,
+				0,1,1,1,0,0,
+				1,1,1,0,0,0,
+				1,1,0,0,0,1,
+			],
+		];
+		for (let i = 0; i < stripes.length; i++) {
+			let stripe = stripes[i];
+			let tile = document.createElement('canvas');
+			tile.width = tile_edge;
+			tile.height = tile_edge;
+			let tile_ctx = tile.getContext('2d');
+			let image_data = tile_ctx.createImageData(
+				tile.width,
+				tile.height
+			);
+			for (let j = 0; j < stripe.length; j++) {
+				let value = 0;
+				if (1 == stripe[j]) {
+					value = 255;
+				}
+				let index = j * 4;
+				image_data.data[index] = value;
+				image_data.data[index + 1] = value;
+				image_data.data[index + 2] = value;
+				image_data.data[index + 3] = 255;
+			}
+			tile_ctx.putImageData(image_data, 0, 0);
+			let canvas = document.createElement('canvas');
+			canvas.width = this.tegaki.display.width;
+			canvas.height = this.tegaki.display.height;
+			let ctx = canvas.getContext('2d');
+			for (let j = 0; j < canvas.height; j += tile.height) {
+				for (let k = 0; k < canvas.width; k += tile.width) {
+					ctx.drawImage(tile, k, j);
+				}
+			}
+			this.ants_diags[i] = canvas;
+		}
+	}
+	build_ants() {
+		this.ants_mask.width = this.tegaki.display.width;
+		this.ants_mask.height = this.tegaki.display.height;
+		this.ants.width = this.tegaki.display.width;
+		this.ants.height = this.tegaki.display.height;
+		// ants outline
+		this.ants_mask_ctx.imageSmoothingEnabled = false;
+		this.ants_mask_ctx.drawImage(
+			this.selection,
+			0,
+			0,
+			this.ants_mask.width,
+			this.ants_mask.height
+		);
+		let image_data = this.ants_mask_ctx.getImageData(
+			0,
+			0,
+			this.ants_mask.width,
+			this.ants_mask.height
+		);
+		erase_image_data_interior(image_data);
+		this.ants_mask_ctx.putImageData(image_data, 0, 0);
 	}
 }
 
@@ -1390,6 +1726,7 @@ export class Tegaki {
 			eyedropper: new Eyedropper(this),
 			fill: new Fill(this),
 			move: new Move(this),
+			select_marquee: new SelectMarquee(this),
 			//TODO select
 			//TODO mosaic
 			//TODO jumble
@@ -1675,6 +2012,7 @@ export class Tegaki {
 			this.flip();
 			this.flip();
 		}
+		this.workspace.dispatchEvent(new Event('apparent_size_change'));
 	}
 	set_focus(x, y) {
 		this.focus.x = x;
@@ -1789,7 +2127,7 @@ export class Tegaki {
 			this.canvas_ctx.globalCompositeOperation = 'destination-out';
 		}
 		this.push_undo_canvas();
-		this.canvas_ctx.drawImage(this.selection.mask);
+		this.canvas_ctx.drawImage(this.selection.selection, 0, 0);
 		this.clear_display();
 		this.draw_to_display(this.canvas);
 		this.safety_save();

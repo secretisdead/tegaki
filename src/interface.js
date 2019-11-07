@@ -20,7 +20,7 @@ export class Menus {
 			let item_name = this.tegaki.tools[tool_name].name;
 			this.tool_buttons[item_name] = this.add_interface_item(
 				this.menu,
-				'tegaki-menu-tool-' + item_name,
+				'tegaki-menu-tool-' + item_name.replace('_', '-'),
 				localization.tool_buttons[item_name].text,
 				localization.tool_buttons[item_name].tip,
 				e => {

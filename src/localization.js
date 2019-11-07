@@ -39,7 +39,7 @@ export let localization = {
 			text: 'Move',
 			tip: 'Move an area of the canvas',
 		},
-		select: {
+		select_marquee: {
 			text: 'Select',
 			tip: 'Select an area of the canvas',
 		},

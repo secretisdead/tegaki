@@ -16,7 +16,7 @@ export class KeyboardShortcuts {
 					key: 'l',
 				},
 				magnifier: {
-					key: 'm',
+					key: 'z',
 				},
 				draw: {
 					key: 'b',
@@ -29,6 +29,12 @@ export class KeyboardShortcuts {
 				},
 				fill: {
 					key: 'f',
+				},
+				move: {
+					key: 'v',
+				},
+				select_marquee: {
+					key: 'm',
 				},
 			},
 			actions: {
@@ -97,6 +103,10 @@ export class KeyboardShortcuts {
 			headless: {
 				swap_tool: {
 					key: 'x',
+				},
+				deselect: {
+					ctrl: true,
+					key: 'd',
 				},
 			},
 			// these should only be single keys with no modifiers
@@ -243,5 +253,8 @@ export class KeyboardShortcuts {
 	// headless bindings
 	swap_tool() {
 		this.tegaki.swap_tool();
+	}
+	deselect() {
+		this.tegaki.selection.deselect();
 	}
 }
