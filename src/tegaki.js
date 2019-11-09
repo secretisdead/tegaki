@@ -1437,10 +1437,15 @@ export class Selection {
 			this.deselect();
 		});
 		this.tegaki.workspace.addEventListener('apparent-size-change', () => {
-			this.rebuild_ants = true;
+			this.ants.width = this.tegaki.display.width;
+			this.ants.height = this.tegaki.display.height;
 			this.build_ants_diags();
+			this.rebuild_ants = true;
 		});
 		this.tegaki.workspace.addEventListener('select', () => {
+			this.rebuild_ants = true;
+		});
+		this.tegaki.workspace.addEventListener('flip', () => {
 			this.rebuild_ants = true;
 		});
 	}
@@ -1584,6 +1589,14 @@ export class Selection {
 		this.ants_mask.height = this.tegaki.display.height;
 		this.ants.width = this.tegaki.display.width;
 		this.ants.height = this.tegaki.display.height;
+		if (this.tegaki.flipped) {
+			this.ants_mask_ctx.save();
+			this.ants_mask_ctx.translate(this.ants_mask.width, 0);
+			this.ants_mask_ctx.scale(-1, 1);
+		}
+		else {
+			this.ants_mask_ctx.restore();
+		}
 		// ants outline
 		this.ants_mask_ctx.imageSmoothingEnabled = false;
 		this.ants_mask_ctx.drawImage(
