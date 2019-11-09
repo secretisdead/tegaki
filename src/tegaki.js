@@ -1440,13 +1440,13 @@ export class Selection {
 			this.ants.width = this.tegaki.display.width;
 			this.ants.height = this.tegaki.display.height;
 			this.build_ants_diags();
-			this.rebuild_ants = true;
+			this.build_ants();
 		});
 		this.tegaki.workspace.addEventListener('select', () => {
 			this.rebuild_ants = true;
 		});
 		this.tegaki.workspace.addEventListener('flip', () => {
-			this.rebuild_ants = true;
+			this.build_ants();
 		});
 	}
 	deselect() {
