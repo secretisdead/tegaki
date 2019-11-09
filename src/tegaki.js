@@ -2020,7 +2020,7 @@ export class Tegaki {
 			this.flip();
 			this.flip();
 		}
-		this.workspace.dispatchEvent(new Event('apparent_size_change'));
+		this.workspace.dispatchEvent(new Event('apparent-size-change'));
 	}
 	set_focus(x, y) {
 		this.focus.x = x;
