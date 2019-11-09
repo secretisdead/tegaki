@@ -1437,6 +1437,9 @@ export class Selection {
 			this.deselect();
 		});
 		this.tegaki.workspace.addEventListener('apparent-size-change', () => {
+			if (!this.active) {
+				return;
+			}
 			this.ants.width = this.tegaki.display.width;
 			this.ants.height = this.tegaki.display.height;
 			this.build_ants_diags();
@@ -1446,6 +1449,9 @@ export class Selection {
 			this.rebuild_ants = true;
 		});
 		this.tegaki.workspace.addEventListener('flip', () => {
+			if (!this.active) {
+				return;
+			}
 			this.build_ants();
 		});
 	}
