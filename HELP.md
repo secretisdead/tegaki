@@ -60,9 +60,12 @@ These are static right now. Eventually I'll add a nice interface for the user to
 
 ### Headless
 
-| Description | Key |
-| ----------- | --- |
-| Swap tool   | X   |
+| Description       | Key    |
+| ----------------- | ------ |
+| Swap tool         | X      |
+| Deselect          | Ctrl+D |
+| Invert selection  | Alt+I  |
+| Crop to selection | Alt+X  |
 
 ### Temp tools
 
