@@ -1442,7 +1442,12 @@ export class Selection {
 			this.deselect();
 		});
 		this.tegaki.workspace.addEventListener('apparent-size-change', () => {
-			if (!this.active) {
+			console.log('in apparent size change selection');
+			if (
+				!this.active
+				&& this.ants.width == this.tegaki.display.width
+				&& this.ants.height == this.tegaki.display.height
+			) {
 				return;
 			}
 			this.ants.width = this.tegaki.display.width;
