@@ -357,7 +357,11 @@ export class Brush extends Tool {
 		this.update_point();
 	}
 	set_size(size) {
-		this.size = Math.floor(size);
+		size = Math.floor(size);
+		if (this.size == size) {
+			return;
+		}
+		this.size = size;
 		this.update_point();
 		this.tegaki.workspace.dataset.toolSize = this.size;
 	}
