@@ -259,6 +259,32 @@ export class Menus {
 			);
 		});
 
+		// selection
+		this.selection_action_buttons = {
+			'deselect': null,
+			'invert_selection': null,
+			'crop_to_selection': null,
+		};
+		for (let item_name in this.selection_action_buttons) {
+			this.selection_action_buttons[item_name] = this.add_interface_item(
+				this.menu,
+				'tegaki-menu-selection-' + item_name.replace(/_/g, '-'),
+				localization.selection_action_buttons[item_name].text,
+				localization.selection_action_buttons[item_name].tip,
+				e => {
+					this[e.currentTarget.dataset.name]();
+				},
+				{'name': item_name}
+			);
+		}
+		this.tegaki.workspace.dataset.selectActive = 0;
+		this.tegaki.workspace.addEventListener('select', () => {
+			this.tegaki.workspace.dataset.selectActive = 1;
+		});
+		this.tegaki.workspace.addEventListener('deselect', () => {
+			this.tegaki.workspace.dataset.selectActive = 0;
+		});
+
 		// status
 		this.status = document.createElement('div');
 		this.status.id = 'tegaki-status';
@@ -395,9 +421,9 @@ export class Menus {
 			this.set_anti_aliasing(e.currentTarget.checked);
 		});
 		this.settings_canvas_size_submit.addEventListener('click', e => {
-			this.tegaki.set_canvas_size(
-				this.settings_canvas_size_width.value,
-				this.settings_canvas_size_height.value
+			this.tegaki.resize(
+				parseInt(this.settings_canvas_size_width.value),
+				parseInt(this.settings_canvas_size_height.value)
 			);
 		});
 		this.update_settings_values();
@@ -580,6 +606,29 @@ export class Menus {
 		this.tegaki.alert(localization.action_buttons.send.alert);
 		//TODO actual send here
 		//let data = this.tegaki.get_presave_canvas().toDataURL();
+	}
+	deselect() {
+		this.tegaki.selection.deselect();
+	}
+	invert_selection() {
+		this.tegaki.selection.invert_selection();
+	}
+	crop_to_selection() {
+		switch (this.tegaki.selection.crop_to_selection()) {
+			case 1:
+				this.tegaki.alert(
+					localization.selection_action_buttons.crop_to_selection.alert.no_selection
+				);
+				break;
+			case 2:
+				this.tegaki.alert(
+					localization.selection_action_buttons.crop_to_selection.alert.no_data
+				);
+				break;
+			case 0:
+			default:
+				break;
+		}
 	}
 	set_status_interval(interval_ms) {
 		if (this.status_interval) {

@@ -118,6 +118,24 @@ export let localization = {
 			},
 		},
 	},
+	selection_action_buttons: {
+		deselect: {
+			text: 'Deselect',
+			tip: 'Deselect',
+		},
+		invert_selection: {
+			text: 'Invert',
+			tip: 'Invert selection',
+		},
+		crop_to_selection: {
+			text: 'Crop',
+			tip: 'Crop to selection',
+			alert: {
+				no_selection: 'No selection to crop to',
+				no_data: 'Selection contained no drawing',
+			},
+		},
+	},
 	status: {
 		boxes: {
 			coordinates: 'Canvas coordinates',

@@ -108,6 +108,14 @@ export class KeyboardShortcuts {
 					ctrl: true,
 					key: 'd',
 				},
+				invert_selection: {
+					alt: true,
+					key: 'i',
+				},
+				crop_to_selection: {
+					alt: true,
+					key: 'x',
+				},
 			},
 			// these should only be single keys with no modifiers
 			// to reliably enter and exit the temp tool state

@@ -3,7 +3,8 @@
 // tegaki by secret
 // remember to be kind
 
-//TODO ensure fill respects masks (except tones)
+//TODO select events should become part of the undo history maybe?
+//TODO select rect dragging indicator should be 1px outline of rect of inverted canvas
 //TODO brush quadratic interpolation for original brush shapes
 //TODO  for smooth curves between large input gaps instead of straight lines while keeping good line quality
 //TODO switching between brush and eraser with shortcut keys doesn't instantly draw new cursor shape
@@ -1448,6 +1449,9 @@ export class Selection {
 		this.tegaki.workspace.addEventListener('select', () => {
 			this.rebuild_ants = true;
 		});
+		this.tegaki.workspace.addEventListener('invert-selection', () => {
+			this.rebuild_ants = true;
+		});
 		this.tegaki.workspace.addEventListener('flip', () => {
 			if (!this.active) {
 				return;
@@ -1503,6 +1507,114 @@ export class Selection {
 		this.mask_ctx.globalCompositeOperation = 'copy';
 		this.mask_ctx.drawImage(this.invert(this.selection), 0, 0);
 		this.select();
+	}
+	invert_selection() {
+		if (!this.active) {
+			return;
+		}
+		// actually copy contents to preserve canvas references
+		let selection = document.createElement('canvas');
+		selection.width = this.selection.width;
+		selection.height = this.selection.height;
+		let selection_ctx = selection.getContext('2d');
+		selection_ctx.globalCompositeOperation = 'copy';
+		selection_ctx.drawImage(this.selection, 0, 0);
+		this.selection_ctx.globalCompositeOperation = 'copy';
+		this.selection_ctx.drawImage(this.mask, 0, 0);
+		this.mask_ctx.globalCompositeOperation = 'copy';
+		this.mask_ctx.drawImage(selection, 0, 0);
+		this.build_ants();
+		this.tegaki.workspace.dispatchEvent(new Event('invert-selection'));
+	}
+	crop_to_selection() {
+		if (!this.active) {
+			console.log('No selection to crop to');
+			return 1;
+		}
+		let temp = document.createElement('canvas');
+		temp.width = this.tegaki.canvas.width;
+		temp.height = this.tegaki.canvas.height;
+		let temp_ctx = temp.getContext('2d');
+		temp_ctx.drawImage(this.tegaki.canvas, 0, 0);
+		temp_ctx.globalCompositeOperation = 'destination-in';
+		temp_ctx.drawImage(this.selection, 0, 0);
+		// determine content bounds
+		let first_y = null;
+		let first_x = null;
+		let last_y = null;
+		let last_x = null;
+		let image_data = temp_ctx.getImageData(0, 0, temp.width, temp.height);
+		for (let y = 0; y < temp.height; y++) {
+			let row_empty = true;
+			let first_in_row = null;
+			let last_in_row = null;
+			for (let x = 0; x < temp.width; x++) {
+				let index = (y * temp.width * 4) + (x * 4);
+				if (0 == image_data.data[index + 3]) {
+					continue;
+				}
+				row_empty = false;
+				if (null == first_in_row) {
+					first_in_row = x;
+					if (null == first_x) {
+						first_x = first_in_row;
+					}
+					first_x = Math.min(first_x, first_in_row);
+				}
+				else {
+					last_in_row = x;
+					if (null == last_x) {
+						last_x = last_in_row;
+					}
+					last_x = Math.max(last_x, last_in_row);
+				}
+			}
+			if (!row_empty) {
+				if (null == first_y) {
+					first_y = y;
+				}
+			}
+			else if (null != first_y && null == last_y) {
+				last_y = y;
+			}
+		}
+		// resize canvas to selection size
+		let width = last_x - first_x;
+		let height = last_y - first_y;
+		if (0 == width || 0 == height) {
+			console.log('Selection contained no drawing');
+			return 2;
+		}
+		this.tegaki.push_undo_resize(
+			this.tegaki.canvas.width,
+			this.tegaki.canvas.height,
+			width,
+			height
+		);
+		this.tegaki.set_canvas_size(width, height);
+		this.tegaki.canvas_ctx.clearRect(
+			0,
+			0,
+			this.tegaki.canvas.width,
+			this.tegaki.canvas.height
+		);
+		// copy selected area
+		this.tegaki.canvas_ctx.globalCompositeOperation = 'source-over';
+		this.tegaki.canvas_ctx.drawImage(
+			temp,
+			first_x,
+			first_y,
+			this.tegaki.canvas.width,
+			this.tegaki.canvas.height,
+			0,
+			0,
+			this.tegaki.canvas.width,
+			this.tegaki.canvas.height
+		);
+		this.deselect();
+		this.tegaki.draw_to_display(this.tegaki.canvas);
+		this.tegaki.workspace.dispatchEvent(new Event('crop-to-selection'));
+		return 0;
 	}
 	build_ants_diags() {
 		let tile_edge = 6;
@@ -1986,11 +2098,6 @@ export class Tegaki {
 		this.workspace.style.height = document.documentElement.clientHeight + 'px';
 	}
 	set_canvas_size(width, height) {
-		if (width < this.canvas.width || height < this.canvas.height) {
-			if (!this.confirm(localization.confirm.resize)) {
-				return;
-			}
-		}
 		// copy canvas to temp
 		let temp = document.createElement('canvas');
 		temp.width = this.canvas.width;
@@ -2011,13 +2118,21 @@ export class Tegaki {
 		//TODO keep relative focus?
 		//TODO for now just recenter
 		this.center();
-		this.push_undo_state(
-			'resize',
-			{
-				width: width,
-				height: height,
+	}
+	resize(width, height) {
+		if (width < this.canvas.width || height < this.canvas.height) {
+			if (!this.confirm(localization.confirm.resize)) {
+				return;
 			}
+		}
+		this.push_undo_resize(
+			this.canvas.width,
+			this.canvas.height,
+			width,
+			height
 		);
+		this.set_canvas_size(width, height);
+		this.draw_to_display(this.canvas);
 	}
 	set_apparent_size() {
 		let width = this.canvas.width * this.zoom;
@@ -2333,24 +2448,66 @@ export class Tegaki {
 			this.get_canvas_image_data()
 		);
 	}
-	apply_state(state, redo=false) {
+	push_undo_resize(before_width, before_height, after_width, after_height) {
+		this.push_undo_canvas();
+		this.push_undo_state(
+			'resize',
+			{
+				before: {
+					width: before_width,
+					height: before_height,
+				},
+				after: {
+					width: after_width,
+					height: after_height,
+				},
+			}
+		);
+	}
+	push_redo_resize(before_width, before_height, after_width, after_height) {
+		this.push_redo_canvas();
+		this.push_redo_state(
+			'resize',
+			{
+				before: {
+					width: before_width,
+					height: before_height,
+				},
+				after: {
+					width: after_width,
+					height: after_height,
+				},
+			}
+		);
+	}
+	apply_state(state, redo=false, push_other=true) {
+		let action = 'undo';
 		let other = 'redo';
 		if (redo) {
+			action = 'redo';
 			other = 'undo';
 		}
 		switch(state.type) {
 			case 'resize':
-				this['push_' + other + '_state'](
-					'resize',
-					{
-						width: this.canvas.width,
-						height: this.canvas.height,
-					}
+				if (push_other) {
+					this['push_' + other + '_resize'](
+						state.data.after.width,
+						state.data.after.height,
+						state.data.before.width,
+						state.data.before.height
+					);
+				}
+				this.set_canvas_size(
+					state.data.before.width,
+					state.data.before.height
 				);
-				this.set_canvas_size(state.data.width, state.data.height);
+				let canvas_state = this[action + '_history'].pop();
+				this.apply_state(canvas_state, redo, false);
 				break;
 			case 'canvas':
-				this['push_' + other + '_canvas']();
+				if (push_other) {
+					this['push_' + other + '_canvas']();
+				}
 				this.canvas_ctx.putImageData(state.data, 0, 0);
 				this.safety_save();
 				this.clear_display();
@@ -2467,6 +2624,7 @@ export class Tegaki {
 			if (after_draw && 'function' == typeof after_draw) {
 				after_draw(image);
 			}
+			this.draw_to_display(this.canvas);
 		};
 		image.src = image_url;
 	};

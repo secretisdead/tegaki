@@ -89,7 +89,8 @@ html {
 #tegaki-menu #tegaki-menu-tool-property-brush-shape-round,
 #tegaki-menu #tegaki-menu-tool-property-brush-size-indicator,
 #tegaki-menu #tegaki-menu-tool-property-brush-size-decrease,
-#tegaki-menu #tegaki-menu-tool-property-brush-size-increase {
+#tegaki-menu #tegaki-menu-tool-property-brush-size-increase,
+#tegaki-menu [id^='tegaki-menu-selection-'] {
 	width: var(--menu-item-edge-thin);
 }
 
@@ -98,6 +99,7 @@ html {
 [id^='tegaki-menu-action-'],
 #tegaki-menu-tool-property-brush-size-decrease,
 #tegaki-menu-tool-property-brush-size-increase,
+#tegaki-menu [id^='tegaki-menu-selection-'],
 [id^='tegaki-status-box-']::before,
 [id^='tegaki-status-button-'] {
 	background-image: var(--ui);
@@ -122,7 +124,8 @@ html {
 #tegaki-workspace[data-undos-available='0'] #tegaki-menu-action-undo,
 #tegaki-workspace[data-redos-available='0'] #tegaki-menu-action-redo,
 #tegaki-workspace:not([data-current-tool='draw']):not([data-current-tool='erase']) [id^='tegaki-menu-tool-property-brush-'],
-#tegaki-menu #tegaki-menu-tool-property-brush-size-indicator {
+#tegaki-menu #tegaki-menu-tool-property-brush-size-indicator,
+#tegaki-workspace[data-select-active='0'] [id^='tegaki-menu-selection-'] {
 	background-color: var(--interface-item-background);
 	cursor: default;
 }
@@ -130,7 +133,8 @@ html {
 /*disabled*/
 #tegaki-workspace[data-undos-available='0'] #tegaki-menu-action-undo::after,
 #tegaki-workspace[data-redos-available='0'] #tegaki-menu-action-redo::after,
-#tegaki-workspace:not([data-current-tool='draw']):not([data-current-tool='erase']) [id^='tegaki-menu-tool-property-brush-']:not(#tegaki-menu-tool-property-brush-size-range)::after {
+#tegaki-workspace:not([data-current-tool='draw']):not([data-current-tool='erase']) [id^='tegaki-menu-tool-property-brush-']:not(#tegaki-menu-tool-property-brush-size-range)::after,
+#tegaki-workspace[data-select-active='0'] [id^='tegaki-menu-selection-']::after {
 	content: "";
 	background-color: var(--bar-background);
 	opacity: 0.5;
@@ -168,8 +172,9 @@ html {
 #tegaki-menu-tool-select-marquee {
 	background-position: -238px 0;
 }
-/*TODO select rectangle*/
-/*TODO select lasso*/
+#tegaki-menu-tool-select-lasso {
+	background-position: -272px 0;
+}
 /*TODO select wand*/
 
 /*actions*/
@@ -332,6 +337,17 @@ html {
 }
 #tegaki-menu-tool-property-brush-size-increase {
 	background-position: -28px -68px;
+}
+
+/*selection properties*/
+#tegaki-menu-selection-deselect {
+	background-position: -56px -68px;
+}
+#tegaki-menu-selection-invert-selection {
+	background-position: -84px -68px;
+}
+#tegaki-menu-selection-crop-to-selection {
+	background-position: -112px -68px;
 }
 
 /*status box icons*/
