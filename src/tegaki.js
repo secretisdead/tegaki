@@ -1153,7 +1153,6 @@ export class Marquee extends Tool {
 		super(tegaki);
 		this.name = 'marquee';
 		this.active = false;
-		this.mode = 'replace';
 		this.start = {
 			x: null,
 			y: null,
@@ -1221,6 +1220,7 @@ export class SelectMarquee extends Marquee {
 	constructor(tegaki) {
 		super(tegaki);
 		this.name = 'select_marquee';
+		this.mode = 'replace';
 		this.indicator = document.createElement('canvas');
 		this.indicator.width = this.tegaki.canvas.width;
 		this.indicator.height = this.tegaki.canvas.height;
