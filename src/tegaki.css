@@ -27,6 +27,8 @@ html, body {
 	position: absolute;
 	top: 0;
 	left: 0;
+	image-rendering: pixelated;
+	image-rendering: optimizespeed;
 }
 #tegaki-paper {
 	background-image: var(--transparent);

@@ -104,6 +104,8 @@ html {
 [id^='tegaki-status-button-'] {
 	background-image: var(--ui);
 	background-repeat: no-repeat;
+	image-rendering: pixelated;
+	image-rendering: optimizespeed;
 }
 
 /*interactive*/
